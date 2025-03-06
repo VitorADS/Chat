@@ -16,12 +16,12 @@ $http = new Server('0.0.0.0', 9501);
 //        echo "Swoole HTTP server is started.\n";
 //    }
 //);
-//$http->on(
+// $http->on(
 //    'request',
 //    function (Request $request, Response $response) {
 //        $response->end('xablau');
 //    }
-//);
+// );
 
 $http->on(
     'message',
@@ -30,8 +30,6 @@ $http->on(
         $origem = $message->fd;
 
         foreach ($conexoes as $conexao) {
-            var_dump($conexao);
-            var_dump($message);
             if($conexao === $origem) continue;
             $http->push(
                 $conexao,

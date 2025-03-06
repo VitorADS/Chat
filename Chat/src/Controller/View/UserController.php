@@ -27,8 +27,8 @@ class UserController extends AbstractController
         $error = $auth->getLastAuthenticationError();
         $lastUserName = $auth->getLastUsername();
 
-        if($error) {
-            $this->addFlash('danger', $error->getMessage());
+        if($error instanceof BadCredentialsException){
+            $this->addFlash('danger', 'E-mail e/ou senha incorretos!');
         }
 
         return $this->render($this->view . '/index.html.twig', compact(

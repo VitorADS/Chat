@@ -1,34 +1,33 @@
-<output></output> <br>
-<input type="text">
+{% extends 'base.html.twig' %}
 
-<script>
-    const ws = new WebSocket('ws://11.10.0.11:9501');
-    const input = document.querySelector('input');
-    const output = document.querySelector('output');
+{% block title %}Login{% endblock %}
 
-    // ws.addEventListener('open', (e) => {
-    //     ws.send('Connection teste');
-    // });
-    ws.addEventListener('message', console.log);
+{% block body %}
+    <h1>Login</h1>
 
-    ws.addEventListener('message', message => {
-        const dados = JSON.parse(message.data);
-        if(dados.type === 'chat'){
-            const json = JSON.parse(dados.text);
-            const value = json.message;
-            output.append('Outro: ' + value, document.createElement('br'));
-        }
-    });
+    {% include "alerts/message.html.twig" %}
 
-    input.addEventListener('keypress', e => {
-        if (e.code === 'Enter') {
-            const valor = input.value;
-            output.append('Eu: ' + valor, document.createElement('br'));
-            ws.send(JSON.stringify({
-                'message': valor
-            }));
+    <form action="{{ path('app_user_login') }}" method="post">
+        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
 
-            input.value = '';
-        }
-    });
-</script>
+        <div class="form-group mb-3">
+            <label class="form-label" for="username">E-mail:</label>
+            <input class="form-control" type="email" id="username" name="_username" value="{{ lastUserName }}" placeholder="Digite seu e-mail" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label class="form-label" for="password">Senha:</label>
+            <input class="form-control" type="password" id="password" name="_password" placeholder="Digite sua senha" required>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Entrar</button>
+
+        <div class="text-center mt-3">
+            <a href="{{ path('app_user_home') }}" class="btn btn-secondary text-white">Criar uma conta</a>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="#" class="text-primary">Esqueceu a senha?</a>
+        </div>
+    </form>
+{% endblock %}
