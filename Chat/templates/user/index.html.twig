@@ -1,0 +1,34 @@
+<output></output> <br>
+<input type="text">
+
+<script>
+    const ws = new WebSocket('ws://11.10.0.11:9501');
+    const input = document.querySelector('input');
+    const output = document.querySelector('output');
+
+    // ws.addEventListener('open', (e) => {
+    //     ws.send('Connection teste');
+    // });
+    ws.addEventListener('message', console.log);
+
+    ws.addEventListener('message', message => {
+        const dados = JSON.parse(message.data);
+        if(dados.type === 'chat'){
+            const json = JSON.parse(dados.text);
+            const value = json.message;
+            output.append('Outro: ' + value, document.createElement('br'));
+        }
+    });
+
+    input.addEventListener('keypress', e => {
+        if (e.code === 'Enter') {
+            const valor = input.value;
+            output.append('Eu: ' + valor, document.createElement('br'));
+            ws.send(JSON.stringify({
+                'message': valor
+            }));
+
+            input.value = '';
+        }
+    });
+</script>

@@ -1,0 +1,67 @@
+###############################################################################
+#                          Generated on phpdocker.io                          #
+###############################################################################
+version: '3.1'
+services:
+    memcached:
+        image: 'memcached:alpine'
+        networks:
+            - chat
+
+    redis:
+        image: 'redis:alpine'
+        networks:
+            - chat
+
+    postgres:
+        image: 'postgres:15-alpine'
+        working_dir: /application
+        volumes:
+            - './db:/var/lib/postgresql/data'
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=123456
+            - POSTGRES_DB=clinica
+        ports:
+            - '5433:5432'
+        networks:
+            chat:
+                ipv4_address: 11.10.0.10
+
+    webserver:
+        image: 'nginx:alpine'
+        working_dir: /application
+        volumes:
+            - './Nginx:/application'
+            - './phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf'
+        ports:
+            - '8001:80'
+        networks:
+            - chat
+
+    php-fpm:
+        build: phpdocker/php-fpm
+        working_dir: /application
+        volumes:
+            - './Chat:/application'
+            - './phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.4/fpm/conf.d/99-overrides.ini'
+        networks:
+            - chat
+
+    php-swoole:
+        build: phpdocker/php-swoole
+        working_dir: /var/www
+        volumes:
+            - './Websocket:/var/www'
+        ports:
+            - "9501:9501"
+        networks:
+            chat:
+                ipv4_address: 11.10.0.11
+
+networks:
+    chat:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 11.10.0.0/16
