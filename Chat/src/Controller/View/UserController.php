@@ -6,6 +6,7 @@ use App\Service\UserService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class UserController extends AbstractController
@@ -34,6 +35,12 @@ class UserController extends AbstractController
         return $this->render($this->view . '/index.html.twig', compact(
             'lastUserName'
         ));
+    }
+
+    #[Route('/register', name: 'app_user_register', methods:['GET', 'POST'])]
+    public function register(Request $request): Response
+    {
+
     }
 
     #[Route('/home', name: 'app_user_home', methods:['GET'])]

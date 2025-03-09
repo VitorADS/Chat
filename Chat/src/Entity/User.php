@@ -3,17 +3,23 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\Traits\Timestamps;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')]
+#[ORM\Table(schema: 'app', name: 'user')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[ORM\HasLifecycleCallbacks]
 class User extends AbstractEntity implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    use Timestamps;
+
     #[ORM\Id]
-    #[ORM\GeneratedValue]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     #[ORM\Column]
     private ?int $id = null;
 
@@ -45,6 +51,24 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
     public string $password {
         get => $this->password;
         set => $this->password = $value;
+    }
+
+    #[ORM\OneToOne(inversedBy: 'user')]
+    #[ORM\JoinColumn(nullable: false)]
+    public Person $person {
+        get => $this->person;
+        set => $this->person = $value;
+    }
+
+    /**
+     * @var Collection<int, Message>
+     */
+    #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'origin', orphanRemoval: true)]
+    private Collection $messages;
+
+    public function __construct()
+    {
+        $this->messages = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -83,5 +107,35 @@ class User extends AbstractEntity implements UserInterface, PasswordAuthenticate
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    /**
+     * @return Collection<int, Message>
+     */
+    public function getMessages(): Collection
+    {
+        return $this->messages;
+    }
+
+    public function addMessage(Message $message): static
+    {
+        if (!$this->messages->contains($message)) {
+            $this->messages->add($message);
+            $message->setOrigin($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMessage(Message $message): static
+    {
+        if ($this->messages->removeElement($message)) {
+            // set the owning side to null (unless already changed)
+            if ($message->getOrigin() === $this) {
+                $message->setOrigin(null);
+            }
+        }
+
+        return $this;
     }
 }

@@ -21,7 +21,7 @@ services:
         environment:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=123456
-            - POSTGRES_DB=clinica
+            - POSTGRES_DB=chat
         ports:
             - '5433:5432'
         networks:
